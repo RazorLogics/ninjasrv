@@ -1,6 +1,9 @@
 import { DocumentData } from 'firebase-admin/firestore';
 import * as functions from 'firebase-functions';
 import { Change, EventContext } from 'firebase-functions';
+import fetchMeta from 'fetch-meta-tags'
+
+
 // import metascraper from 'metascraper';
 // import getHTML from 'html-get';
 const getHTML = require('html-get')
@@ -13,10 +16,26 @@ const browserless = require('browserless')()
 // const got = require('got')
 // import got from 'got';
 
+/**
+ * `metascraper` is a collection of tiny packages,
+ * so you can just use what you actually need.
+ */
+const metascraper = require('metascraper')([
+  require('metascraper-author')(),
+  require('metascraper-date')(),
+  require('metascraper-description')(),
+  require('metascraper-image')(),
+  require('metascraper-logo')(),
+  require('metascraper-clearbit')(),
+  require('metascraper-publisher')(),
+  require('metascraper-title')(),
+  require('metascraper-url')()
+])
 
-export const positionFetch = 
+
+export const vacancyFetch = 
 		functions.firestore
-		.document('positionFetch/{uid}')
+		.document('vacancyFetch/{uid}')
 		.onWrite(
 async (change: Change<DocumentData>, context: EventContext) =>
 {
@@ -39,14 +58,16 @@ async (change: Change<DocumentData>, context: EventContext) =>
         const targetUrl=matches[0];
         let metadata;
         try {
-            console.log(`execute got on ${targetUrl}`);
+            console.log(`execute on ${targetUrl}`);
 
+            let ogTags = await fetchMeta(targetUrl);
 
+            console.log(`og: ${JSON.stringify(ogTags)}`)
             /**
              * The main logic
              */
             getContent(targetUrl)
-              //.then(metascraper)
+              .then(metascraper)
               .then(metadata => console.log(metadata))
               .then(browserless.close)
               ////.then(process.exit)

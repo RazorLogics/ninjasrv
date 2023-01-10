@@ -7,4 +7,4 @@ initializeApp();//{ credential: cert(serviceAccount) });
 
 export var db = getFirestore();
 
-export { positionFetch } from "./position_fetch";
+export { vacancyFetch } from "./vacancy_fetch";
